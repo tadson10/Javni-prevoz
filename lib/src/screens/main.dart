@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:javniPrevoz/src/screens/departure_list.dart';
 import 'package:javniPrevoz/src/type/departure.dart';
 import 'package:javniPrevoz/src/type/favourite.dart';
+import 'package:javniPrevoz/src/widgets/ts_raw_autocomplete.dart';
 import '../api/arriva_api.dart';
 import '../widgets/ts_autocomplete.dart';
 import 'package:javniPrevoz/src/type/station.dart';
@@ -46,6 +47,11 @@ class _MyWidgetState extends State<MyWidget> {
   final _toAutoKey = GlobalKey();
   List<Favourite> _favourites = <Favourite>[];
 
+  TextEditingController _textEditingControllerFrom = TextEditingController();
+  TextEditingController _textEditingControllerTo = TextEditingController();
+  final FocusNode _focusNodeFrom = FocusNode();
+  final FocusNode _focusNodeTo = FocusNode();
+
   void setStations(List<Station> stations) {
     setState(() {
       _stations = stations;
@@ -79,10 +85,19 @@ class _MyWidgetState extends State<MyWidget> {
   void setIsSwapped(bool isSwapped) {
     setState(() {
       _isSwapped = isSwapped;
-      var tmp = _fromStation;
-      _fromStation = _toStation;
-      _toStation = tmp;
     });
+  }
+
+  void swapStations() {
+    // Swap from and to station selected values
+    var tmp_from = _fromStation;
+    setFromStation(_toStation);
+    setToStation(tmp_from);
+    // Swap texts inside input fields
+    _textEditingControllerFrom.text = _fromStation.POS_NAZ;
+    _textEditingControllerTo.text = _toStation.POS_NAZ;
+    // Save current stations to Shared preferences
+    _saveCurrentStations();
   }
 
   Route _createRoute(fromStation, toStation) {
@@ -119,14 +134,29 @@ class _MyWidgetState extends State<MyWidget> {
     }
   }
 
+  // Show Departures list on favourite select
   void goToDepListScreen(fromStation, toStation) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    setCurrentStations(fromStation, toStation);
+    _saveCurrentStations();
     Navigator.of(context).push(_createRoute(fromStation, toStation));
+  }
+
+  // Set currently selected stations
+  void setCurrentStations(fromStation, toStation) {
+    _textEditingControllerFrom.text = fromStation.POS_NAZ;
+    _textEditingControllerTo.text = toStation.POS_NAZ;
+    setFromStation(fromStation);
+    setToStation(toStation);
   }
 
   @override
   void initState() {
     super.initState();
+    // Read from Shared Preferences
     _loadFavourites();
+    _loadCurrentStations();
+
     // Get all stations on init
     setState(() {
       ArrivaApi.getStations('').then((value) {
@@ -160,10 +190,12 @@ class _MyWidgetState extends State<MyWidget> {
 
   void onFromItemSelected(Station selected) {
     setFromStation(selected);
+    _saveCurrentStations();
   }
 
   void onToItemSelected(Station selected) {
     setToStation(selected);
+    _saveCurrentStations();
   }
 
   Station getFromSelectedItem() {
@@ -177,25 +209,47 @@ class _MyWidgetState extends State<MyWidget> {
   @override
   Widget build(BuildContext context) {
     print('build');
-    var fromStationWidget = TsAutocomplete(
-      formFieldKey: _fromFieldKey,
-      onSearchQuery: _isSwapped ? onToSearchQuery : onFromSearchQuery,
-      onItemSelected: _isSwapped ? onToItemSelected : onFromItemSelected,
-      icon: _isSwapped ? Icons.location_on : Icons.my_location,
-      placeholder: _isSwapped ? 'Izstopna postaja' : 'Vstopna postaja',
-      getStationSelected: _isSwapped ? getToSelectedItem : getFromSelectedItem,
-      autoKey: _fromAutoKey,
-    );
+    // var fromStationWidget = TsAutocomplete(
+    //   formFieldKey: _fromFieldKey,
+    //   onSearchQuery: _isSwapped ? onToSearchQuery : onFromSearchQuery,
+    //   onItemSelected: _isSwapped ? onToItemSelected : onFromItemSelected,
+    //   icon: _isSwapped ? Icons.location_on : Icons.my_location,
+    //   placeholder: _isSwapped ? 'Izstopna postaja' : 'Vstopna postaja',
+    //   getStationSelected: _isSwapped ? getToSelectedItem : getFromSelectedItem,
+    //   autoKey: _fromAutoKey,
+    // );
 
-    var toStationWidget = TsAutocomplete(
-      formFieldKey: _toFieldKey,
-      onSearchQuery: _isSwapped ? onFromSearchQuery : onToSearchQuery,
-      onItemSelected: _isSwapped ? onFromItemSelected : onToItemSelected,
-      icon: _isSwapped ? Icons.my_location : Icons.location_on,
-      placeholder: _isSwapped ? 'Vstopna postaja' : 'Izstopna postaja',
-      getStationSelected: _isSwapped ? getFromSelectedItem : getToSelectedItem,
-      autoKey: _toAutoKey,
-    );
+    var fromStationWidget = TsRawAutocomplete(
+        autoKey: _fromAutoKey,
+        formFieldKey: _fromFieldKey,
+        textEditingControllerInput: _textEditingControllerFrom,
+        icon: Icons.my_location,
+        onSearchQuery: onFromSearchQuery,
+        placeholder: 'Vstopna postaja',
+        onItemSelected: onFromItemSelected,
+        focusNodeAuto: _focusNodeFrom,
+        selectedValue: _fromStation);
+
+    var toStationWidget = TsRawAutocomplete(
+        autoKey: _toAutoKey,
+        formFieldKey: _toFieldKey,
+        textEditingControllerInput: _textEditingControllerTo,
+        icon: Icons.location_on,
+        onSearchQuery: onToSearchQuery,
+        placeholder: 'Izstopna postaja',
+        onItemSelected: onToItemSelected,
+        focusNodeAuto: _focusNodeTo,
+        selectedValue: _toStation);
+
+    // var toStationWidget = TsAutocomplete(
+    //   formFieldKey: _toFieldKey,
+    //   onSearchQuery: _isSwapped ? onFromSearchQuery : onToSearchQuery,
+    //   onItemSelected: _isSwapped ? onFromItemSelected : onToItemSelected,
+    //   icon: _isSwapped ? Icons.my_location : Icons.location_on,
+    //   placeholder: _isSwapped ? 'Vstopna postaja' : 'Izstopna postaja',
+    //   getStationSelected: _isSwapped ? getFromSelectedItem : getToSelectedItem,
+    //   autoKey: _toAutoKey,
+    // );
 
     return Form(
       key: _formKey,
@@ -215,14 +269,13 @@ class _MyWidgetState extends State<MyWidget> {
           body: SingleChildScrollView(
             child: Stack(children: [
               Padding(
-                // padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
                 padding: EdgeInsets.fromLTRB(15, 20, 15, 0),
                 child: Column(children: <Widget>[
-                  _isSwapped ? toStationWidget : fromStationWidget,
+                  fromStationWidget,
                   SizedBox(
                     height: 10.0,
                   ),
-                  _isSwapped ? fromStationWidget : toStationWidget,
+                  toStationWidget,
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Row(
@@ -272,7 +325,7 @@ class _MyWidgetState extends State<MyWidget> {
                         Icons.search,
                         size: 24.0,
                       ),
-                      label: Text('Prikaži'), // <-- Text
+                      label: Text('Prikaži'),
                     ),
                   ),
                   SizedBox(height: 20),
@@ -311,7 +364,7 @@ class _MyWidgetState extends State<MyWidget> {
                   child: Icon(Icons.swap_vert),
                   onPressed: () {
                     FocusScope.of(context).unfocus();
-                    setIsSwapped(!_isSwapped);
+                    swapStations();
                   },
                   backgroundColor: Colors.blueAccent,
                 ),
@@ -320,179 +373,29 @@ class _MyWidgetState extends State<MyWidget> {
           ),
         ),
       ),
-    )
-        // ],
-        ;
+    );
+  }
 
-    // Stack(children: <Widget>[
-    //   Form(
-    //     key: _formKey,
-    //     child: GestureDetector(
-    //       onTap: () {
-    //         FocusScope.of(context).requestFocus(new FocusNode());
-    //       },
-    //       child: Scaffold(
-    //         resizeToAvoidBottomInset: false,
-    //         appBar: PreferredSize(
-    //             preferredSize: Size.fromHeight(50.0),
-    //             child: AppBar(
-    //               title: Text('Arriva'),
-    //               centerTitle: true,
-    //               backgroundColor: Colors.blueAccent,
-    //             )),
-    //         body: Padding(
-    //           // padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
-    //           padding: EdgeInsets.fromLTRB(15, 20, 15, 0),
-    //           child:
-    //               // Center(
-    //               //   child:
-    //               //   SingleChildScrollView(
-    //               // child:
-    //               ListView(
-    //             children: <Widget>[
-    //               _isSwapped ? toStationWidget : fromStationWidget,
-    //               SizedBox(
-    //                 height: 10.0,
-    //               ),
-    //               _isSwapped ? fromStationWidget : toStationWidget,
-    //               // Text('${_fromStation.POS_NAZ}, ${_toStation.POS_NAZ}'),
-    //               // Text('${_favourites.length}'),
-    //               Align(
-    //                 alignment: Alignment.centerLeft,
-    //                 child:
-    //                     // SizedBox(
-    //                     //   width: 150,
-    //                     //   height: 100,
-    //                     //   child:
-    //                     Row(
-    //                   children: [
-    //                     SizedBox(
-    //                       width: 325,
-    //                       // height: 100,
-    //                       child: TextField(
-    //                         controller: dateController,
-    //                         decoration: const InputDecoration(icon: Icon(Icons.calendar_today)),
-    //                         readOnly: true,
-    //                         onTap: () async {
-    //                           DateTime? pickedDate = await showDatePicker(
-    //                             context: context,
-    //                             initialDate: DateFormat('d. MM. yyyy').parse(dateController.text),
-    //                             firstDate: DateTime(2020),
-    //                             lastDate: DateTime(2100),
-    //                             locale: Locale('sl', 'GB'),
-    //                           );
-    //                           if (pickedDate != null) {
-    //                             String formattedDate = DateFormat('d. MM. yyyy').format(pickedDate);
-    //                             setState(() {
-    //                               dateController.text = formattedDate;
-    //                             });
-    //                           } else {
-    //                             print("Date is not selected");
-    //                           }
-    //                         },
-    //                       ),
-    //                     ),
-    //                     // SizedBox(
-    //                     //   height: 50,
-    //                     //   width: 50,
-    //                     //   child: FloatingActionButton(
-    //                     //     heroTag: 'btnSearch',
-    //                     //     child: Icon(Icons.search),
-    //                     //     onPressed: searchBtnPress,
-    //                     //     backgroundColor: Colors.blueAccent,
-    //                     //   ),
-    //                     // ),
-    //                   ],
-    //                 ),
-    //                 // ),
-    //               ),
-    //               SizedBox(
-    //                 height: 10,
-    //               ),
-    //               SizedBox(
-    //                 height: 40,
-    //                 width: 200,
-    //                 child: ElevatedButton.icon(
-    //                   style: ButtonStyle(shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)))),
-    //                   onPressed: () {
-    //                     searchBtnPress();
-    //                   },
-    //                   icon: Icon(
-    //                     // <-- Icon
-    //                     Icons.search,
-    //                     size: 24.0,
-    //                   ),
-    //                   label: Text('Prikaži'), // <-- Text
-    //                 ),
-    //               ),
-    //               SizedBox(height: 20),
-    //               // Divider(color: Colors.black),
-    //               Align(
-    //                 alignment: Alignment.centerLeft,
-    //                 child: Text(
-    //                   'Zadnja iskanja',
-    //                   style: TextStyle(fontSize: 20, color: Colors.grey[600]),
-    //                 ),
-    //               ),
-    //               _favourites.isEmpty
-    //                   ? Column(
-    //                       children: [
-    //                         SizedBox(
-    //                           height: 100,
-    //                         ),
-    //                         Text('Prazen seznam')
-    //                       ],
-    //                     )
-    //                   : Column(
-    //                       children: [
-    //                         SizedBox(
-    //                           height: 10,
-    //                         ),
-    //                         for (var fav in _favourites) favouriteTemplate(fav),
-    //                       ],
-    //                     )
+  /* SHARED PREFERENCES */
+  Future<void> _saveCurrentStations() async {
+    print('SAVE');
+    String stations = jsonEncode([_fromStation, _toStation]);
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('stations', stations);
+  }
 
-    //               // Container(
-    //               //     margin: EdgeInsets.only(top: 20),
-    //               //     decoration: BoxDecoration(
-    //               //       border: Border(
-    //               //         top: BorderSide(color: Colors.blueGrey),
-    //               //         bottom: BorderSide(color: Colors.blueGrey),
-    //               //       ),
-    //               //       // borderRadius: BorderRadius.circular(20),
-    //               //     ),
-    //               //     child: SizedBox(
-    //               //       height: 270,
-    //               //       child: ListView.builder(
-    //               //           padding: EdgeInsets.all(0),
-    //               //           itemCount: _favourites.length,
-    //               //           itemBuilder: (context, index) {
-    //               //             final item = _favourites[index];
-    //               //             return favouriteTemplate(item, index);
-    //               //           }),
-    //               //     ),
-    //               //   ),
-    //             ],
-    //           ),
-    //           // ),
-    //         ),
-    //       ),
-    //     ),
-    //   ),
-    //   Positioned(
-    //     top: 120,
-    //     left: 260,
-    //     child: FloatingActionButton(
-    //       heroTag: 'btnSwap',
-    //       child: Icon(Icons.swap_vert),
-    //       onPressed: () {
-    //         FocusScope.of(context).unfocus();
-    //         setIsSwapped(!_isSwapped);
-    //       },
-    //       backgroundColor: Colors.blueAccent,
-    //     ),
-    //   ),
-    // ]);
+  Future<void> _loadCurrentStations() async {
+    final prefs = await SharedPreferences.getInstance();
+    // await prefs.clear();
+    final List stationsList = json.decode(prefs.getString('stations') ?? '[]');
+    print('LOAD');
+    print(stationsList);
+    setState(() {
+      List lst = stationsList.map<Station>((json) => Station.fromJson(json)).toList();
+      if (lst.length > 0) {
+        setCurrentStations(lst[0], lst[1]);
+      }
+    });
   }
 
   Future<void> _addFavourites() async {
@@ -521,37 +424,23 @@ class _MyWidgetState extends State<MyWidget> {
     });
   }
 
-  List<Widget> listFavouriteTemplate(List<Favourite> listFavourite) {
-    List<Widget> result = [];
-    for (int i = 0; i < listFavourite.length; i++) {
-      result.add(favouriteTemplate(listFavourite[i]));
-    }
-    return result;
-  }
-
+  // Favourite item template
   Widget favouriteTemplate(Favourite favourite) {
     print(favourite.toString());
     return Column(children: [
-      // if (index == 0)
-      //   SizedBox(
-      //     height: 5,
-      //   ),
       Dismissible(
           // Each Dismissible must contain a Key. Keys allow Flutter to
           // uniquely identify widgets.
           key: Key('${favourite.fromName}${favourite.toName}'),
-          // Provide a function that tells the app
-          // what to do after an item has been swiped away.
           direction: DismissDirection.endToStart,
           onDismissed: (direction) {
-            // Remove the item from the data source.
             setState(() {
               _favourites.removeWhere((element) => element.fromName == favourite.fromName && element.toName == favourite.toName);
             });
             _saveFavourites();
 
             // Then show a snackbar.
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(' dismissed')));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Relacija odstranjena iz seznama!')));
           },
           background: Container(
               decoration: BoxDecoration(
@@ -560,9 +449,6 @@ class _MyWidgetState extends State<MyWidget> {
               ),
               child: Row(
                 children: const [
-                  // Padding(
-                  //   padding: EdgeInsets.only(right: 200),
-                  //   child:
                   SizedBox(
                     width: 270,
                   ),
@@ -571,7 +457,6 @@ class _MyWidgetState extends State<MyWidget> {
                     size: 40,
                     color: Colors.white,
                   ),
-                  // ),
                 ],
               )),
           child: Card(
@@ -645,9 +530,6 @@ class _MyWidgetState extends State<MyWidget> {
               ),
             ),
           )),
-      // SizedBox(
-      //   height: 5,
-      // )
     ]);
   }
 }
