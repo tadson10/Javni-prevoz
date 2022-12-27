@@ -127,9 +127,13 @@ class _MyWidgetState extends State<MyWidget> {
   }
 
   void searchBtnPress() {
+    // Validate selected stations
     if (_formKey.currentState!.validate()) {
+      // Add to favourites
       _addFavourites();
+      // Hide keyboard
       FocusScope.of(context).requestFocus(new FocusNode());
+      // Switch to departures screen
       goToDepListScreen(_fromStation, _toStation);
     }
   }
