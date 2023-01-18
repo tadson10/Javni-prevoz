@@ -7,6 +7,7 @@ import 'package:javniPrevoz/src/type/departure.dart';
 import 'package:javniPrevoz/src/type/station.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:intl/intl.dart';
 
 class DepartureList extends StatefulWidget {
   DepartureList({Key? key, required this.fromToStations, required this.date, required this.formattedDate}) : super(key: key);
@@ -73,8 +74,7 @@ class _DepartureListState extends State<DepartureList> {
   double timeToDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
 
   Future scrollToItem(bool isOnInit) async {
-    DateTime now = DateTime.now();
-    String nowString = '${now.day}. ${now.month}. ${now.year}';
+    String nowString = new DateFormat('d. MM. yyyy').format(DateTime.now()); //'${now.day}. ${now.month}. ${now.year}';
     // DateTime date = DateTime(now.year, now.month, now.day);
     if (nowString == widget.date) {
       TimeOfDay curTime = TimeOfDay.now();
@@ -94,8 +94,7 @@ class _DepartureListState extends State<DepartureList> {
   }
 
   void getNextDepIndex() {
-    DateTime now = DateTime.now();
-    String nowString = '${now.day}. ${now.month}. ${now.year}';
+    String nowString = new DateFormat('d. MM. yyyy').format(DateTime.now()); //'${now.day}. ${now.month}. ${now.year}';
     if (nowString == widget.date) {
       TimeOfDay curTime = TimeOfDay.now();
       double curTimeD = timeToDouble(curTime);
