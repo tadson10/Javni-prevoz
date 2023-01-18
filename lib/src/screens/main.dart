@@ -406,9 +406,8 @@ class _MyWidgetState extends State<MyWidget> {
     Favourite newFav = Favourite(fromName: _fromStation.POS_NAZ, fromId: _fromStation.JPOS_IJPP, toName: _toStation.POS_NAZ, toId: _toStation.JPOS_IJPP);
     Favourite fav = _favourites.singleWhere((it) => it.fromId == newFav.fromId && it.toId == newFav.toId, orElse: () => Favourite(fromId: -1, fromName: '', toId: -1, toName: ''));
     if (fav.fromId == -1) {
-      setState(() {
-        _favourites.add(newFav);
-      });
+      _favourites.insert(0, newFav);
+      if (_favourites.length > 10) _favourites.removeLast();
       _saveFavourites();
     }
   }
