@@ -83,7 +83,7 @@ class _DepartureListState extends State<DepartureList> {
         Departure dep = departures[i];
         TimeOfDay depTime = TimeOfDay(hour: int.parse(dep.ROD_IODH.split(":")[0]), minute: int.parse(dep.ROD_IODH.split(":")[1]));
         double depTimeD = timeToDouble(depTime);
-        if (depTimeD >= curTimeD) {
+        if (depTimeD >= curTimeD || i == departures.length - 1) {
           itemController.scrollTo(index: i, duration: Duration(milliseconds: 500));
           break;
         }
@@ -98,15 +98,18 @@ class _DepartureListState extends State<DepartureList> {
     if (nowString == widget.date) {
       TimeOfDay curTime = TimeOfDay.now();
       double curTimeD = timeToDouble(curTime);
+      bool exists = false;
       for (int i = 0; i < departures.length; i++) {
         Departure dep = departures[i];
         TimeOfDay depTime = TimeOfDay(hour: int.parse(dep.ROD_IODH.split(":")[0]), minute: int.parse(dep.ROD_IODH.split(":")[1]));
         double depTimeD = timeToDouble(depTime);
         if (depTimeD >= curTimeD) {
           nextDepIndex = i;
+          exists = true;
           break;
         }
       }
+      if (!exists) nextDepIndex = departures.length;
     }
   }
 
