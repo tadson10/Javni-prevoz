@@ -295,7 +295,7 @@ class _MyWidgetState extends State<MyWidget> {
                               DateTime? pickedDate = await showDatePicker(
                                 context: context,
                                 initialDate: DateFormat('d. MM. yyyy').parse(dateController.text),
-                                firstDate: DateTime(2020),
+                                firstDate: DateTime.now(),
                                 lastDate: DateTime(2100),
                                 locale: Locale('sl', 'GB'),
                               );
