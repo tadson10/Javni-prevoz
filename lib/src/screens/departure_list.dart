@@ -37,61 +37,30 @@ class _DepartureListState extends State<DepartureList> {
 
     Future<List<Departure>> result = ArrivaApi.getDepartures(widget.fromToStations[0].JPOS_IJPP, widget.fromToStations[1].JPOS_IJPP, widget.formattedDate);
     result.then((value) {
-      setState(() {
-        departures = value;
-        isLoaded = true;
-      });
-      // Call after frame was built
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        scrollToItem(true);
-      });
-      context.loaderOverlay.hide();
+      departures = value;
+      isLoaded = true;
+      getNextDepIndex();
     });
   }
 
   // Switch stations and get departures
   void switchStations(BuildContext context) {
     context.loaderOverlay.show();
-    setState(() {
-      isLoaded = false;
-      isSwitched = !isSwitched;
-    });
+    isLoaded = false;
+    isSwitched = !isSwitched;
 
     int fromStation = isSwitched ? widget.fromToStations[1].JPOS_IJPP : widget.fromToStations[0].JPOS_IJPP;
     int toStation = isSwitched ? widget.fromToStations[0].JPOS_IJPP : widget.fromToStations[1].JPOS_IJPP;
 
     Future<List<Departure>> result = ArrivaApi.getDepartures(fromStation, toStation, widget.formattedDate);
     result.then((value) {
-      setState(() {
-        departures = value;
-        isLoaded = true;
-      });
-      scrollToItem(false);
-      context.loaderOverlay.hide();
+      departures = value;
+      isLoaded = true;
+      getNextDepIndex();
     });
   }
 
   double timeToDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
-
-  Future scrollToItem(bool isOnInit) async {
-    String nowString = new DateFormat('d. MM. yyyy').format(DateTime.now()); //'${now.day}. ${now.month}. ${now.year}';
-    // DateTime date = DateTime(now.year, now.month, now.day);
-    if (nowString == widget.date) {
-      TimeOfDay curTime = TimeOfDay.now();
-      double curTimeD = timeToDouble(curTime);
-      for (int i = 0; i < departures.length; i++) {
-        Departure dep = departures[i];
-        TimeOfDay depTime = TimeOfDay(hour: int.parse(dep.ROD_IODH.split(":")[0]), minute: int.parse(dep.ROD_IODH.split(":")[1]));
-        double depTimeD = timeToDouble(depTime);
-        if (depTimeD >= curTimeD || i == departures.length - 1) {
-          itemController.scrollTo(index: i, duration: Duration(milliseconds: 500));
-          break;
-        }
-      }
-    } else if (!isOnInit) {
-      itemController.scrollTo(index: 0, duration: Duration(milliseconds: 500));
-    }
-  }
 
   void getNextDepIndex() {
     String nowString = new DateFormat('d. MM. yyyy').format(DateTime.now()); //'${now.day}. ${now.month}. ${now.year}';
@@ -104,13 +73,23 @@ class _DepartureListState extends State<DepartureList> {
         TimeOfDay depTime = TimeOfDay(hour: int.parse(dep.ROD_IODH.split(":")[0]), minute: int.parse(dep.ROD_IODH.split(":")[1]));
         double depTimeD = timeToDouble(depTime);
         if (depTimeD >= curTimeD) {
-          nextDepIndex = i;
-          exists = true;
+          setState(() {
+            nextDepIndex = i;
+            exists = true;
+          });
           break;
         }
       }
       if (!exists) nextDepIndex = departures.length;
+    } else {
+      setState(() {
+        nextDepIndex = 0;
+      });
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      itemController.jumpTo(index: nextDepIndex);
+      context.loaderOverlay.hide();
+    });
   }
 
 // Creates departure Card
@@ -235,35 +214,36 @@ class _DepartureListState extends State<DepartureList> {
 
   @override
   Widget build(BuildContext context) {
-    print('build');
-    getNextDepIndex();
     return Scaffold(
       appBar: AppBar(
           title: Column(children: [
-            FittedBox(
-              fit: BoxFit.fitWidth,
-              child: Row(children: [
-                Text(
-                  '${isSwitched ? widget.fromToStations[1].POS_NAZ : widget.fromToStations[0].POS_NAZ} ',
-                ),
-                SizedBox(
-                  height: 30,
-                  width: 30,
-                  child: FloatingActionButton(
-                    heroTag: 'btnSwapH',
-                    mini: true,
-                    child: Icon(Icons.swap_horiz),
-                    onPressed: () {
-                      switchStations(context);
-                    },
-                    backgroundColor: Colors.blue,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Row(children: [
+                  Text(
+                    '${isSwitched ? widget.fromToStations[1].POS_NAZ : widget.fromToStations[0].POS_NAZ} ',
                   ),
-                ),
-                Text(
-                  ' ${isSwitched ? widget.fromToStations[0].POS_NAZ : widget.fromToStations[1].POS_NAZ}',
-                  overflow: TextOverflow.clip,
-                ),
-              ]),
+                  SizedBox(
+                    height: 30,
+                    width: 30,
+                    child: FloatingActionButton(
+                      heroTag: 'btnSwapH',
+                      mini: true,
+                      child: Icon(Icons.swap_horiz),
+                      onPressed: () {
+                        switchStations(context);
+                      },
+                      backgroundColor: Colors.blue,
+                    ),
+                  ),
+                  Text(
+                    ' ${isSwitched ? widget.fromToStations[0].POS_NAZ : widget.fromToStations[1].POS_NAZ}',
+                    overflow: TextOverflow.clip,
+                  ),
+                ]),
+              ),
             ),
             Align(
               alignment: Alignment.centerLeft,
@@ -278,10 +258,10 @@ class _DepartureListState extends State<DepartureList> {
           ]),
           backgroundColor: Colors.blueAccent),
       body: LoaderOverlay(
-        overlayOpacity: 0.6,
+        overlayOpacity: 1,
         useDefaultLoading: false,
-        duration: const Duration(milliseconds: 250),
-        reverseDuration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 100),
+        reverseDuration: const Duration(milliseconds: 300),
         overlayWidget: Center(
           child: LoadingAnimationWidget.fourRotatingDots(
             color: Colors.white,
@@ -299,6 +279,7 @@ class _DepartureListState extends State<DepartureList> {
                 padding: EdgeInsets.only(bottom: 16.0),
                 itemScrollController: itemController,
                 itemCount: departures.length,
+                initialScrollIndex: nextDepIndex,
                 itemBuilder: (context, index) {
                   final item = departures[index];
                   return departureTemplate(item, index);

@@ -14,8 +14,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:flutter/services.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+
   runApp(MaterialApp(
     home: MyWidget(),
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -46,6 +50,8 @@ class _MyWidgetState extends State<MyWidget> {
   final _fromAutoKey = GlobalKey();
   final _toAutoKey = GlobalKey();
   List<Favourite> _favourites = <Favourite>[];
+  final _stackKey = GlobalKey();
+  double _swapBtnOffset = 48;
 
   TextEditingController _textEditingControllerFrom = TextEditingController();
   TextEditingController _textEditingControllerTo = TextEditingController();
@@ -157,6 +163,11 @@ class _MyWidgetState extends State<MyWidget> {
   @override
   void initState() {
     super.initState();
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      calcSwapBtnOffset();
+    });
+
     // Read from Shared Preferences
     _loadFavourites();
     _loadCurrentStations();
@@ -210,19 +221,22 @@ class _MyWidgetState extends State<MyWidget> {
     return _toStation;
   }
 
+  void calcSwapBtnOffset() {
+    final RenderBox renderBoxFrom = _fromFieldKey.currentContext?.findRenderObject() as RenderBox;
+    final Size sizeFrom = renderBoxFrom.size;
+    final Offset offsetFrom = renderBoxFrom.localToGlobal(Offset.zero);
+
+    final RenderBox renderBoxTo = _toFieldKey.currentContext?.findRenderObject() as RenderBox;
+    final Size sizeTo = renderBoxTo.size;
+    final Offset offsetTo = renderBoxTo.localToGlobal(Offset.zero);
+
+    _swapBtnOffset = ((offsetTo.dy - offsetFrom.dy + sizeFrom.height / 2 + (offsetTo.dy - offsetFrom.dy - sizeFrom.height)) / 2).roundToDouble(); // To_y - From_y + height/2 + razmik_med_inputoma/2
+    // _swapBtnOffset[1] = offsetFrom.dx + sizeFrom.width * 0.75;
+  }
+
   @override
   Widget build(BuildContext context) {
     print('build');
-    // var fromStationWidget = TsAutocomplete(
-    //   formFieldKey: _fromFieldKey,
-    //   onSearchQuery: _isSwapped ? onToSearchQuery : onFromSearchQuery,
-    //   onItemSelected: _isSwapped ? onToItemSelected : onFromItemSelected,
-    //   icon: _isSwapped ? Icons.location_on : Icons.my_location,
-    //   placeholder: _isSwapped ? 'Izstopna postaja' : 'Vstopna postaja',
-    //   getStationSelected: _isSwapped ? getToSelectedItem : getFromSelectedItem,
-    //   autoKey: _fromAutoKey,
-    // );
-
     var fromStationWidget = TsRawAutocomplete(
         autoKey: _fromAutoKey,
         formFieldKey: _fromFieldKey,
@@ -245,16 +259,6 @@ class _MyWidgetState extends State<MyWidget> {
         focusNodeAuto: _focusNodeTo,
         selectedValue: _toStation);
 
-    // var toStationWidget = TsAutocomplete(
-    //   formFieldKey: _toFieldKey,
-    //   onSearchQuery: _isSwapped ? onFromSearchQuery : onToSearchQuery,
-    //   onItemSelected: _isSwapped ? onFromItemSelected : onToItemSelected,
-    //   icon: _isSwapped ? Icons.my_location : Icons.location_on,
-    //   placeholder: _isSwapped ? 'Vstopna postaja' : 'Izstopna postaja',
-    //   getStationSelected: _isSwapped ? getFromSelectedItem : getToSelectedItem,
-    //   autoKey: _toAutoKey,
-    // );
-
     return Form(
       key: _formKey,
       child: GestureDetector(
@@ -271,7 +275,7 @@ class _MyWidgetState extends State<MyWidget> {
                 backgroundColor: Colors.blueAccent,
               )),
           body: SingleChildScrollView(
-            child: Stack(children: [
+            child: Stack(key: _stackKey, children: [
               Padding(
                 padding: EdgeInsets.fromLTRB(15, 20, 15, 0),
                 child: Column(children: <Widget>[
@@ -282,35 +286,27 @@ class _MyWidgetState extends State<MyWidget> {
                   toStationWidget,
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 325,
-                          // height: 100,
-                          child: TextField(
-                            controller: dateController,
-                            decoration: const InputDecoration(icon: Icon(Icons.calendar_today)),
-                            readOnly: true,
-                            onTap: () async {
-                              DateTime? pickedDate = await showDatePicker(
-                                context: context,
-                                initialDate: DateFormat('d. MM. yyyy').parse(dateController.text),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime(2100),
-                                locale: Locale('sl', 'GB'),
-                              );
-                              if (pickedDate != null) {
-                                String formattedDate = DateFormat('d. MM. yyyy').format(pickedDate);
-                                setState(() {
-                                  dateController.text = formattedDate;
-                                });
-                              } else {
-                                print("Date is not selected");
-                              }
-                            },
-                          ),
-                        ),
-                      ],
+                    child: TextField(
+                      controller: dateController,
+                      decoration: const InputDecoration(icon: Icon(Icons.calendar_today)),
+                      readOnly: true,
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateFormat('d. MM. yyyy').parse(dateController.text),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2100),
+                          locale: Locale('sl', 'GB'),
+                        );
+                        if (pickedDate != null) {
+                          String formattedDate = DateFormat('d. MM. yyyy').format(pickedDate);
+                          setState(() {
+                            dateController.text = formattedDate;
+                          });
+                        } else {
+                          print("Date is not selected");
+                        }
+                      },
                     ),
                   ),
                   SizedBox(
@@ -361,8 +357,8 @@ class _MyWidgetState extends State<MyWidget> {
                 ]),
               ),
               Positioned(
-                top: 45,
-                left: 260,
+                top: _swapBtnOffset,
+                left: MediaQuery.of(context).size.width * 0.71,
                 child: FloatingActionButton(
                   heroTag: 'btnSwap',
                   child: Icon(Icons.swap_vert),
