@@ -8,7 +8,7 @@ Aplikacija je narejena z uporabo ogrodja Flutter in omogoča:
 <div style="text-align: center;">
     <img src="./zasloni/zaslon1.jpg" width="210" height="400" style="margin-right:20px;"/>
     <img src="./zasloni/zaslon2.jpg" width="210" height="400" /> 
-</div>
+</div> 
 
 <!-- Deployment buildanje: 
 flutter build apk --split-per-abi -t lib/src/screens/main.dart
