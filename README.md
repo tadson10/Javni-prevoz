@@ -12,4 +12,10 @@ Aplikacija je narejena z uporabo ogrodja Flutter in omogoča:
 
 <!-- Deployment buildanje: 
 flutter build apk --split-per-abi -t lib/src/screens/main.dart
-flutter install -->
+flutter build apk -t lib/src/screens/main.dart
+flutter install
+
+ICONS:
+flutter pub get
+flutter pub run flutter_launcher_icons:main 
+ -->

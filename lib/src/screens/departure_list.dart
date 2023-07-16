@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:io';
+
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:javniPrevoz/src/api/arriva_api.dart';
@@ -8,9 +10,11 @@ import 'package:javniPrevoz/src/type/station.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:intl/intl.dart';
+import 'main.dart' as mainScreen;
 
 class DepartureList extends StatefulWidget {
-  DepartureList({Key? key, required this.fromToStations, required this.date, required this.formattedDate}) : super(key: key);
+  DepartureList({Key? key, required this.fromToStations, required this.date, required this.formattedDate})
+      : super(key: key);
 
   final List<Station> fromToStations;
   final String date;
@@ -27,6 +31,53 @@ class _DepartureListState extends State<DepartureList> {
   final itemController = ItemScrollController();
   int nextDepIndex = 0;
 
+  void showError(BuildContext context, String error) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Napaka'),
+        content: new Text(error),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              context.loaderOverlay.hide();
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: const Text('Nazaj'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, 'Poskusi znova');
+              getDepartures(
+                  widget.fromToStations[0].JPOS_IJPP, widget.fromToStations[1].JPOS_IJPP, widget.formattedDate);
+            },
+            child: const Text('Poskusi znova'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void getDepartures(fromStation, toStation, date) {
+    Future<dynamic> result = ArrivaApi.getDepartures(fromStation, toStation, date);
+
+    result.then((value) {
+      print(value);
+      if (value is String) {
+        print('BLA STRING');
+        showError(context, 'Težava pri komunikaciji s strežniki.');
+      } else {
+        departures = value;
+        isLoaded = true;
+        if (departures.length > 0) {
+          getNextDepIndex();
+        }
+        context.loaderOverlay.hide();
+      }
+    });
+  }
+
   void initState() {
     super.initState();
     print('initState');
@@ -34,13 +85,7 @@ class _DepartureListState extends State<DepartureList> {
       await Future.delayed(Duration.zero);
       context.loaderOverlay.show();
     }();
-
-    Future<List<Departure>> result = ArrivaApi.getDepartures(widget.fromToStations[0].JPOS_IJPP, widget.fromToStations[1].JPOS_IJPP, widget.formattedDate);
-    result.then((value) {
-      departures = value;
-      isLoaded = true;
-      getNextDepIndex();
-    });
+    getDepartures(widget.fromToStations[0].JPOS_IJPP, widget.fromToStations[1].JPOS_IJPP, widget.formattedDate);
   }
 
   // Switch stations and get departures
@@ -52,12 +97,8 @@ class _DepartureListState extends State<DepartureList> {
     int fromStation = isSwitched ? widget.fromToStations[1].JPOS_IJPP : widget.fromToStations[0].JPOS_IJPP;
     int toStation = isSwitched ? widget.fromToStations[0].JPOS_IJPP : widget.fromToStations[1].JPOS_IJPP;
 
-    Future<List<Departure>> result = ArrivaApi.getDepartures(fromStation, toStation, widget.formattedDate);
-    result.then((value) {
-      departures = value;
-      isLoaded = true;
-      getNextDepIndex();
-    });
+    // Get list of departures between the stations for the selected date
+    getDepartures(fromStation, toStation, widget.formattedDate);
   }
 
   double timeToDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
@@ -70,7 +111,8 @@ class _DepartureListState extends State<DepartureList> {
       bool exists = false;
       for (int i = 0; i < departures.length; i++) {
         Departure dep = departures[i];
-        TimeOfDay depTime = TimeOfDay(hour: int.parse(dep.ROD_IODH.split(":")[0]), minute: int.parse(dep.ROD_IODH.split(":")[1]));
+        TimeOfDay depTime =
+            TimeOfDay(hour: int.parse(dep.ROD_IODH.split(":")[0]), minute: int.parse(dep.ROD_IODH.split(":")[1]));
         double depTimeD = timeToDouble(depTime);
         if (depTimeD >= curTimeD) {
           setState(() {
@@ -86,9 +128,9 @@ class _DepartureListState extends State<DepartureList> {
         nextDepIndex = 0;
       });
     }
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       itemController.jumpTo(index: nextDepIndex);
-      context.loaderOverlay.hide();
     });
   }
 

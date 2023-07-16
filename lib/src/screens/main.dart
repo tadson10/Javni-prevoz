@@ -1,5 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
@@ -58,6 +61,29 @@ class _MyWidgetState extends State<MyWidget> {
   final FocusNode _focusNodeFrom = FocusNode();
   final FocusNode _focusNodeTo = FocusNode();
 
+  void showError(BuildContext context, String error) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Napaka'),
+        content: new Text(error),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => exit(0),
+            child: const Text('Zapri'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, 'Poskusi znova');
+              pridobiPostaje();
+            },
+            child: const Text('Poskusi znova'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void setStations(List<Station> stations) {
     setState(() {
       _stations = stations;
@@ -113,7 +139,10 @@ class _MyWidgetState extends State<MyWidget> {
       transitionDuration: Duration(milliseconds: 500),
       reverseTransitionDuration: Duration(milliseconds: 500),
       pageBuilder: (context, animation, secondaryAnimation) => DepartureList(
-        fromToStations: [Station(JPOS_IJPP: fromStation.JPOS_IJPP, POS_NAZ: fromStation.POS_NAZ), Station(JPOS_IJPP: toStation.JPOS_IJPP, POS_NAZ: toStation.POS_NAZ)],
+        fromToStations: [
+          Station(JPOS_IJPP: fromStation.JPOS_IJPP, POS_NAZ: fromStation.POS_NAZ),
+          Station(JPOS_IJPP: toStation.JPOS_IJPP, POS_NAZ: toStation.POS_NAZ)
+        ],
         formattedDate: formattedDate,
         date: dateController.text,
       ),
@@ -160,9 +189,27 @@ class _MyWidgetState extends State<MyWidget> {
     setToStation(toStation);
   }
 
+  void pridobiPostaje() {
+    ArrivaApi.getStations('').then((value) {
+      if (value.length == 0) {
+        showError(context, 'Težava pri komunikaciji s strežniki. Prosimo, poskusite kasneje!');
+      } else
+        setStations(value);
+    });
+  }
+
+  String removeSumniki(String text) {
+    text = text.replaceAll('š', 's').replaceAll('č', 'c').replaceAll('ć', 'c').replaceAll('ž', 'z');
+    return text;
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      print("WidgetsBinding");
+      pridobiPostaje();
+    });
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
       calcSwapBtnOffset();
@@ -174,16 +221,8 @@ class _MyWidgetState extends State<MyWidget> {
 
     // Get all stations on init
     setState(() {
-      ArrivaApi.getStations('').then((value) {
-        setStations(value);
-      });
       dateController.text = new DateFormat('d. MM. yyyy').format(DateTime.now());
     });
-  }
-
-  String removeSumniki(String text) {
-    text = text.replaceAll('š', 's').replaceAll('č', 'c').replaceAll('ć', 'c').replaceAll('ž', 'z');
-    return text;
   }
 
   Iterable<Station> onSearch(String query) {
@@ -230,7 +269,9 @@ class _MyWidgetState extends State<MyWidget> {
     final Size sizeTo = renderBoxTo.size;
     final Offset offsetTo = renderBoxTo.localToGlobal(Offset.zero);
 
-    _swapBtnOffset = ((offsetTo.dy - offsetFrom.dy + sizeFrom.height / 2 + (offsetTo.dy - offsetFrom.dy - sizeFrom.height)) / 2).roundToDouble(); // To_y - From_y + height/2 + razmik_med_inputoma/2
+    _swapBtnOffset =
+        ((offsetTo.dy - offsetFrom.dy + sizeFrom.height / 2 + (offsetTo.dy - offsetFrom.dy - sizeFrom.height)) / 2)
+            .roundToDouble(); // To_y - From_y + height/2 + razmik_med_inputoma/2
     // _swapBtnOffset[1] = offsetFrom.dx + sizeFrom.width * 0.75;
   }
 
@@ -316,7 +357,9 @@ class _MyWidgetState extends State<MyWidget> {
                     height: 40,
                     width: 200,
                     child: ElevatedButton.icon(
-                      style: ButtonStyle(shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)))),
+                      style: ButtonStyle(
+                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)))),
                       onPressed: () {
                         searchBtnPress();
                       },
@@ -399,8 +442,13 @@ class _MyWidgetState extends State<MyWidget> {
   }
 
   Future<void> _addFavourites() async {
-    Favourite newFav = Favourite(fromName: _fromStation.POS_NAZ, fromId: _fromStation.JPOS_IJPP, toName: _toStation.POS_NAZ, toId: _toStation.JPOS_IJPP);
-    Favourite fav = _favourites.singleWhere((it) => it.fromId == newFav.fromId && it.toId == newFav.toId, orElse: () => Favourite(fromId: -1, fromName: '', toId: -1, toName: ''));
+    Favourite newFav = Favourite(
+        fromName: _fromStation.POS_NAZ,
+        fromId: _fromStation.JPOS_IJPP,
+        toName: _toStation.POS_NAZ,
+        toId: _toStation.JPOS_IJPP);
+    Favourite fav = _favourites.singleWhere((it) => it.fromId == newFav.fromId && it.toId == newFav.toId,
+        orElse: () => Favourite(fromId: -1, fromName: '', toId: -1, toName: ''));
     if (fav.fromId == -1) {
       _favourites.insert(0, newFav);
       if (_favourites.length > 10) _favourites.removeLast();
@@ -434,7 +482,8 @@ class _MyWidgetState extends State<MyWidget> {
           direction: DismissDirection.endToStart,
           onDismissed: (direction) {
             setState(() {
-              _favourites.removeWhere((element) => element.fromName == favourite.fromName && element.toName == favourite.toName);
+              _favourites.removeWhere(
+                  (element) => element.fromName == favourite.fromName && element.toName == favourite.toName);
             });
             _saveFavourites();
 
@@ -472,7 +521,10 @@ class _MyWidgetState extends State<MyWidget> {
               highlightColor: Colors.grey[300],
               borderRadius: BorderRadius.circular(20),
               onTapDown: (details) => {print('DOWN')},
-              onTap: () => {goToDepListScreen(Station(JPOS_IJPP: favourite.fromId, POS_NAZ: favourite.fromName), Station(JPOS_IJPP: favourite.toId, POS_NAZ: favourite.toName))},
+              onTap: () => {
+                goToDepListScreen(Station(JPOS_IJPP: favourite.fromId, POS_NAZ: favourite.fromName),
+                    Station(JPOS_IJPP: favourite.toId, POS_NAZ: favourite.toName))
+              },
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Column(
