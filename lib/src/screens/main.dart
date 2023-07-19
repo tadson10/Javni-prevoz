@@ -359,12 +359,12 @@ class _MyWidgetState extends State<MyWidget> {
                     child: ElevatedButton.icon(
                       style: ButtonStyle(
                           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)))),
+                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+                          backgroundColor: MaterialStateProperty.all<Color>(Colors.blueAccent)),
                       onPressed: () {
                         searchBtnPress();
                       },
                       icon: Icon(
-                        // <-- Icon
                         Icons.search,
                         size: 24.0,
                       ),
