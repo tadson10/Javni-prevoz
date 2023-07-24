@@ -10,6 +10,7 @@ import 'package:javniPrevoz/src/type/station.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:intl/intl.dart';
+import 'dep_stations_list.dart';
 import 'main.dart' as mainScreen;
 
 class DepartureList extends StatefulWidget {
@@ -78,6 +79,37 @@ class _DepartureListState extends State<DepartureList> {
     });
   }
 
+  // Show Departures list on favourite select
+  void goToDepStationsListScreen(Departure departure) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    Navigator.of(context).push(_createRoute(departure));
+  }
+
+  Route _createRoute(Departure departure) {
+    return PageRouteBuilder(
+      transitionDuration: Duration(milliseconds: 500),
+      reverseTransitionDuration: Duration(milliseconds: 500),
+      pageBuilder: (context, animation, secondaryAnimation) => DepartureStationsList(
+        departure: departure,
+        fromStation: getFromStation().POS_NAZ,
+        toStation: getToStation().POS_NAZ,
+        date: widget.date,
+      ),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
+  }
+
   void initState() {
     super.initState();
     print('initState');
@@ -88,14 +120,22 @@ class _DepartureListState extends State<DepartureList> {
     getDepartures(widget.fromToStations[0].JPOS_IJPP, widget.fromToStations[1].JPOS_IJPP, widget.formattedDate);
   }
 
+  Station getFromStation() {
+    return isSwitched ? widget.fromToStations[1] : widget.fromToStations[0];
+  }
+
+  Station getToStation() {
+    return isSwitched ? widget.fromToStations[0] : widget.fromToStations[1];
+  }
+
   // Switch stations and get departures
   void switchStations(BuildContext context) {
     context.loaderOverlay.show();
     isLoaded = false;
     isSwitched = !isSwitched;
 
-    int fromStation = isSwitched ? widget.fromToStations[1].JPOS_IJPP : widget.fromToStations[0].JPOS_IJPP;
-    int toStation = isSwitched ? widget.fromToStations[0].JPOS_IJPP : widget.fromToStations[1].JPOS_IJPP;
+    int fromStation = getFromStation().JPOS_IJPP;
+    int toStation = getToStation().JPOS_IJPP;
 
     // Get list of departures between the stations for the selected date
     getDepartures(fromStation, toStation, widget.formattedDate);
@@ -103,6 +143,7 @@ class _DepartureListState extends State<DepartureList> {
 
   double timeToDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
 
+  // Function finds the next departure based on current time
   void getNextDepIndex() {
     String nowString = new DateFormat('d. MM. yyyy').format(DateTime.now()); //'${now.day}. ${now.month}. ${now.year}';
     if (nowString == widget.date) {
@@ -128,7 +169,8 @@ class _DepartureListState extends State<DepartureList> {
         nextDepIndex = 0;
       });
     }
-    
+
+    // Scroll to the next departure
     WidgetsBinding.instance.addPostFrameCallback((_) {
       itemController.jumpTo(index: nextDepIndex);
     });
@@ -137,14 +179,18 @@ class _DepartureListState extends State<DepartureList> {
 // Creates departure Card
   Widget departureTemplate(departure, index) {
     return Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: Colors.blueAccent,
-          ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: Colors.blueAccent,
         ),
-        color: index < nextDepIndex ? Colors.grey[200] : Colors.white,
-        margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+      ),
+      color: index < nextDepIndex ? Colors.grey[200] : Colors.white,
+      margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+      child: InkWell(
+        highlightColor: Colors.grey[300],
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => {goToDepStationsListScreen(departures[index])},
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
@@ -251,7 +297,9 @@ class _DepartureListState extends State<DepartureList> {
               ),
             ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   @override

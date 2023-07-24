@@ -49,6 +49,7 @@ dependencies:
   syncfusion_flutter_datepicker: ^20.3.52
   fluttertoast: ^8.1.1
   flutter_native_splash: ^2.2.16
+  timelines: ^0.1.0
   # flutter_launcher_icons: ^0.10.0
 
 dev_dependencies:

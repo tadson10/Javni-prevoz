@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:crypto/crypto.dart';
 import 'package:javniPrevoz/src/type/departure.dart';
+import 'package:javniPrevoz/src/type/departureStation.dart';
 import 'package:javniPrevoz/src/type/station.dart';
 
 class ArrivaApi {
@@ -109,9 +110,9 @@ class ArrivaApi {
 
       if (response.statusCode == 200) {
         print(response.body);
-        final List departures = json.decode(response.body)[0]['DepartureStationList'];
-        print(departures);
-        return departures.map<Departure>((json) => Departure.fromJson(json)).toList();
+        final List departureStationsList = json.decode(response.body)[0]['DepartureStationList'];
+        print(departureStationsList);
+        return departureStationsList.map<DepartureStation>((json) => DepartureStation.fromJson(json)).toList();
       } else {
         throw Exception();
       }

@@ -4,7 +4,7 @@ class DepartureStation {
   final String ROD_IPRI; 
   final int ROD_POS;
   final String ROD_IODH; 
-  final String ROD_STOP;
+  final int ROD_STOP;
   final double ROD_LAT;
   final double ROD_LON; 
 
@@ -26,14 +26,14 @@ class DepartureStation {
         ROD_IPRI: '',
         ROD_POS: -1,
         ROD_IODH: '',
-        ROD_STOP: '',
+        ROD_STOP: -1,
         ROD_LAT: -1,
         ROD_LON: -1);
   }
 
   static DepartureStation fromJson(Map<String, dynamic> json) => DepartureStation(
         ROD_ZAP: json['ROD_ZAP'],
-        POS_NAZ: json['REG_POS_NAZISIF'],
+        POS_NAZ: json['POS_NAZ'],
         ROD_IPRI: json['ROD_IPRI'],
         ROD_POS: json['ROD_POS'],
         ROD_IODH: json['ROD_IODH'],
