@@ -109,19 +109,6 @@ class _DepartureStationsListState extends State<DepartureStationsList> {
                     Text(
                       '${widget.fromStation} - ',
                     ),
-                    // SizedBox(
-                    //   height: 30,
-                    //   width: 30,
-                    //   child: FloatingActionButton(
-                    //     heroTag: 'btnSwapH',
-                    //     mini: true,
-                    //     child: Icon(Icons.swap_horiz),
-                    //     onPressed: () {
-                    //       switchStations(context);
-                    //     },
-                    //     backgroundColor: Colors.blue,
-                    //   ),
-                    // ),
                     Text(
                       '${widget.toStation} ',
                       overflow: TextOverflow.clip,
@@ -174,7 +161,7 @@ class _DepartureStationsListState extends State<DepartureStationsList> {
                   ),
                   margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
                   child: Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0, top: 12.0),
+                      padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height*0.02, top: MediaQuery.of(context).size.height*0.02),
                       child: ListView(padding: const EdgeInsets.only(right: 0.0), children: [
                         FixedTimeline.tileBuilder(
                           theme: TimelineTheme.of(context).copyWith(
@@ -196,17 +183,17 @@ class _DepartureStationsListState extends State<DepartureStationsList> {
                             // ),
                             contentsBuilder: (context, index) => Row(children: [
                               SizedBox(
-                                width: 200,
+                                width: MediaQuery.of(context).size.width*0.65,//200,
                                 child:
                                     Padding(
-                                  padding: const EdgeInsets.only(top: 10.0, bottom: 10.0, left: 40.0),
+                                  padding: EdgeInsets.only(top: 10.0, bottom: 10.0, left: MediaQuery.of(context).size.width*0.1/*40.0*/),
                                   child: Text(departureStations[index].POS_NAZ,
                                       style: TextStyle(
                                           fontWeight: checkIfBetween(index) ? FontWeight.bold : FontWeight.normal,
                                           fontSize: checkIfStartOrEnd(index) ? 18 : 13)),
                                 ),
                               ),
-                              SizedBox(width: 60),
+                              // SizedBox(width: 60),
                               Text(
                                   departureStations[index].ROD_IODH != ""
                                       ? departureStations[index].ROD_IODH

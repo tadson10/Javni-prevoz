@@ -37,7 +37,7 @@ class ArrivaApi {
       } else {
         throw Exception();
       }
-    } on TimeoutException catch (e) {
+    } catch (e) {
       print(e);
       return [];
     }
@@ -74,7 +74,7 @@ class ArrivaApi {
       } else {
         throw Exception();
       }
-    } on TimeoutException catch (e) {
+    } catch (e) {
       print(e);
       return 'Timeout';
     }
@@ -116,7 +116,7 @@ class ArrivaApi {
       } else {
         throw Exception();
       }
-    } on TimeoutException catch (e) {
+    } catch (e) {
       print(e);
       return 'Timeout';
     }

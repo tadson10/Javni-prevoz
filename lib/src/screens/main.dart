@@ -266,13 +266,11 @@ class _MyWidgetState extends State<MyWidget> {
     final Offset offsetFrom = renderBoxFrom.localToGlobal(Offset.zero);
 
     final RenderBox renderBoxTo = _toFieldKey.currentContext?.findRenderObject() as RenderBox;
-    final Size sizeTo = renderBoxTo.size;
     final Offset offsetTo = renderBoxTo.localToGlobal(Offset.zero);
 
     _swapBtnOffset =
         ((offsetTo.dy - offsetFrom.dy + sizeFrom.height / 2 + (offsetTo.dy - offsetFrom.dy - sizeFrom.height)) / 2)
             .roundToDouble(); // To_y - From_y + height/2 + razmik_med_inputoma/2
-    // _swapBtnOffset[1] = offsetFrom.dx + sizeFrom.width * 0.75;
   }
 
   @override
