@@ -59,7 +59,6 @@ class _DepartureStationsListState extends State<DepartureStationsList> {
     Future<dynamic> result = ArrivaApi.getDepartureStations(departure);
 
     result.then((value) {
-      print(value);
       if (value is String) {
         showError(context, 'Težava pri komunikaciji s strežniki.');
       } else {
@@ -88,7 +87,6 @@ class _DepartureStationsListState extends State<DepartureStationsList> {
   void initState() {
     super.initState();
     print('initState');
-    print(widget.departure.toString());
     () async {
       await Future.delayed(Duration.zero);
       context.loaderOverlay.show();

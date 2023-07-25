@@ -86,7 +86,7 @@ class ArrivaApi {
       var formatter = new DateFormat('yyyyMMddHHmmss');
       String timestamp = formatter.format(date);
       String token = md5.convert(utf8.encode('R300_VozniRed_2015' + timestamp)).toString();
-      // print(date);
+      
       final queryParameters = {
         'cTOKEN': token,
         'cTIMESTAMP': timestamp,
@@ -109,9 +109,7 @@ class ArrivaApi {
       );
 
       if (response.statusCode == 200) {
-        print(response.body);
         final List departureStationsList = json.decode(response.body)[0]['DepartureStationList'];
-        print(departureStationsList);
         return departureStationsList.map<DepartureStation>((json) => DepartureStation.fromJson(json)).toList();
       } else {
         throw Exception();

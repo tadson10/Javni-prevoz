@@ -1,4 +1,4 @@
-# Javni prevoz
+# Arriva vozni red
 
 Aplikacija je narejena z uporabo ogrodja Flutter in omogoča:
 - Prikaz voznega reda za izbrano relacijo ponudnika Arriva.

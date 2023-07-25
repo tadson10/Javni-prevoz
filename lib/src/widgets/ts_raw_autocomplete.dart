@@ -48,8 +48,6 @@ class TsRawAutocomplete extends StatelessWidget {
       textEditingController: textEditingControllerInput,
       displayStringForOption: (option) => option.POS_NAZ,
       fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-        print('BLA');
-        print(focusNode);
         return TextFormField(
           key: formFieldKey,
           validator: (value) {

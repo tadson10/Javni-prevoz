@@ -64,9 +64,7 @@ class _DepartureListState extends State<DepartureList> {
     Future<dynamic> result = ArrivaApi.getDepartures(fromStation, toStation, date);
 
     result.then((value) {
-      print(value);
       if (value is String) {
-        print('BLA STRING');
         showError(context, 'Težava pri komunikaciji s strežniki.');
       } else {
         departures = value;

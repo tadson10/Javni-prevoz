@@ -193,9 +193,28 @@ class _MyWidgetState extends State<MyWidget> {
     ArrivaApi.getStations('').then((value) {
       if (value.length == 0) {
         showError(context, 'Težava pri komunikaciji s strežniki. Prosimo, poskusite kasneje!');
-      } else
+      } else {
         setStations(value);
+        saveAllStationsSP(value);
+      }
     });
+  }
+
+  /* SHARED PREFERENCES */
+  Future<void> saveAllStationsSP(allStations) async {
+    String stations = jsonEncode(allStations);
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('allStations', stations);
+  }
+
+  Future<void> getAllStationsSP() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List stationsList = json.decode(prefs.getString('allStations') ?? '[]');
+    if (stationsList.length == 0) {
+      pridobiPostaje();
+    } else {
+      setStations(stationsList.map<Station>((json) => Station.fromJson(json)).toList());
+    }
   }
 
   String removeSumniki(String text) {
@@ -207,8 +226,7 @@ class _MyWidgetState extends State<MyWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      print("WidgetsBinding");
-      pridobiPostaje();
+      getAllStationsSP();
     });
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -419,7 +437,6 @@ class _MyWidgetState extends State<MyWidget> {
 
   /* SHARED PREFERENCES */
   Future<void> _saveCurrentStations() async {
-    print('SAVE');
     String stations = jsonEncode([_fromStation, _toStation]);
     final prefs = await SharedPreferences.getInstance();
     prefs.setString('stations', stations);
@@ -429,8 +446,6 @@ class _MyWidgetState extends State<MyWidget> {
     final prefs = await SharedPreferences.getInstance();
     // await prefs.clear();
     final List stationsList = json.decode(prefs.getString('stations') ?? '[]');
-    print('LOAD');
-    print(stationsList);
     setState(() {
       List lst = stationsList.map<Station>((json) => Station.fromJson(json)).toList();
       if (lst.length > 0) {
@@ -471,7 +486,6 @@ class _MyWidgetState extends State<MyWidget> {
 
   // Favourite item template
   Widget favouriteTemplate(Favourite favourite) {
-    print(favourite.toString());
     return Column(children: [
       Dismissible(
           // Each Dismissible must contain a Key. Keys allow Flutter to
@@ -518,7 +532,6 @@ class _MyWidgetState extends State<MyWidget> {
             child: InkWell(
               highlightColor: Colors.grey[300],
               borderRadius: BorderRadius.circular(20),
-              onTapDown: (details) => {print('DOWN')},
               onTap: () => {
                 goToDepListScreen(Station(JPOS_IJPP: favourite.fromId, POS_NAZ: favourite.fromName),
                     Station(JPOS_IJPP: favourite.toId, POS_NAZ: favourite.toName))
