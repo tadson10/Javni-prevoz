@@ -1,6 +1,6 @@
 {
-    "name": "javniPrevoz",
-    "short_name": "javniPrevoz",
+    "name": "arrivaVozniRed",
+    "short_name": "arrivaVozniRed",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#hexcode",

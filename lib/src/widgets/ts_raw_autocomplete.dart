@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:javniPrevoz/src/type/station.dart';
+import 'package:arrivaVozniRed/src/type/station.dart';
 
 typedef Iterable<Station> StringCallback(String query);
 typedef void StationCallback(Station station);

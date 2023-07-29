@@ -1,4 +1,4 @@
-package com.example.javniPrevoz
+package com.example.arrivaVozniRed
 
 import io.flutter.embedding.android.FlutterActivity
 

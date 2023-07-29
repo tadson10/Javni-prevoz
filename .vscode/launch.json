@@ -5,18 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "javniPrevoz",
+            "name": "arrivaVozniRed",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "javniPrevoz (profile mode)",
+            "name": "arrivaVozniRed (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "javniPrevoz (release mode)",
+            "name": "arrivaVozniRed (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
