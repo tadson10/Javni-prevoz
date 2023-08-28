@@ -1,4 +1,4 @@
-package com.example.arrivaVozniRed
+package com.example.vozniRed
 
 import io.flutter.embedding.android.FlutterActivity
 

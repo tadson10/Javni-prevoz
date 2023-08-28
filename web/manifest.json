@@ -1,6 +1,6 @@
 {
-    "name": "arrivaVozniRed",
-    "short_name": "arrivaVozniRed",
+    "name": "vozniRed",
+    "short_name": "vozniRed",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#hexcode",

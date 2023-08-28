@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:arrivaVozniRed/src/api/arriva_api.dart';
-import 'package:arrivaVozniRed/src/type/station.dart';
+import 'package:vozniRed/src/api/arriva_api.dart';
+import 'package:vozniRed/src/type/station.dart';
 
 // Step 1: Define a Callback.
 typedef void StationCallback(Station station);

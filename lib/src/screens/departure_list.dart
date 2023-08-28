@@ -4,9 +4,9 @@ import 'dart:io';
 
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:arrivaVozniRed/src/api/arriva_api.dart';
-import 'package:arrivaVozniRed/src/type/departure.dart';
-import 'package:arrivaVozniRed/src/type/station.dart';
+import 'package:vozniRed/src/api/arriva_api.dart';
+import 'package:vozniRed/src/type/departure.dart';
+import 'package:vozniRed/src/type/station.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:intl/intl.dart';

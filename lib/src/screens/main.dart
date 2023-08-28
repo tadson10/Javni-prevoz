@@ -6,13 +6,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
-import 'package:arrivaVozniRed/src/screens/departure_list.dart';
-import 'package:arrivaVozniRed/src/type/departure.dart';
-import 'package:arrivaVozniRed/src/type/favourite.dart';
-import 'package:arrivaVozniRed/src/widgets/ts_raw_autocomplete.dart';
+import 'package:vozniRed/src/screens/departure_list.dart';
+import 'package:vozniRed/src/type/departure.dart';
+import 'package:vozniRed/src/type/favourite.dart';
+import 'package:vozniRed/src/widgets/ts_raw_autocomplete.dart';
 import '../api/arriva_api.dart';
 import '../widgets/ts_autocomplete.dart';
-import 'package:arrivaVozniRed/src/type/station.dart';
+import 'package:vozniRed/src/type/station.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -327,7 +327,7 @@ class _MyWidgetState extends State<MyWidget> {
           appBar: PreferredSize(
               preferredSize: Size.fromHeight(50.0),
               child: AppBar(
-                title: Text('Arriva'),
+                title: Text('Vozni red'),
                 centerTitle: true,
                 backgroundColor: Colors.blueAccent,
               )),

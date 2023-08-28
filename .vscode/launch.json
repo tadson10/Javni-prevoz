@@ -5,18 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "arrivaVozniRed",
+            "name": "vozniRed",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "arrivaVozniRed (profile mode)",
+            "name": "vozniRed (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "arrivaVozniRed (release mode)",
+            "name": "vozniRed (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

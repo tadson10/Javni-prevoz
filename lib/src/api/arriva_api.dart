@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:crypto/crypto.dart';
-import 'package:arrivaVozniRed/src/type/departure.dart';
-import 'package:arrivaVozniRed/src/type/departureStation.dart';
-import 'package:arrivaVozniRed/src/type/station.dart';
+import 'package:vozniRed/src/type/departure.dart';
+import 'package:vozniRed/src/type/departureStation.dart';
+import 'package:vozniRed/src/type/station.dart';
 
 class ArrivaApi {
   static Future<List<Station>> getStations(String query) async {
