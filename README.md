@@ -7,8 +7,9 @@ Aplikacija je narejena z uporabo ogrodja Flutter in omogoča:
 - Dostopno na [Google Play](https://play.google.com/store/apps/details?id=com.tadson10.vozniRed&pcampaignid=web_share).
 
 <div style="text-align: center;">
-    <img src="./zasloni/zaslon1.jpg" width="210" height="400" style="margin-right:20px;"/>
-    <img src="./zasloni/zaslon2.jpg" width="210" height="400" /> 
+    <img src="./googlePlay/zaslon_1.png" width="210" height="400" style="margin-right:20px;"/>
+    <img src="./googlePlay/zaslon_3.png" width="210" height="400" style="margin-right:20px;"/>
+    <img src="./googlePlay/zaslon_4.png" width="210" height="400" style="margin-right:20px;"/>
 </div> 
 
 
