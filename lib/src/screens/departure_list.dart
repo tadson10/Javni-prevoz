@@ -211,7 +211,7 @@ class _DepartureListState extends State<DepartureList> {
                   width: 10.0,
                 ),
                 Text(
-                  '${widget.fromToStations[0].POS_NAZ}',
+                  '${isSwitched ? widget.fromToStations[1].POS_NAZ : widget.fromToStations[0].POS_NAZ}',
                   style: TextStyle(
                     fontSize: 16.0,
                     color: Colors.grey[800],
@@ -246,7 +246,7 @@ class _DepartureListState extends State<DepartureList> {
                     width: 10.0,
                   ),
                   Text(
-                    '${widget.fromToStations[1].POS_NAZ}',
+                    '${isSwitched ? widget.fromToStations[0].POS_NAZ : widget.fromToStations[1].POS_NAZ}',
                     style: TextStyle(
                       fontSize: 16.0,
                       color: Colors.grey[800],
