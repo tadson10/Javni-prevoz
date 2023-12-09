@@ -22,4 +22,7 @@ flutter install
 ICONS:
 flutter pub get
 dart run flutter_launcher_icons 
+
+Google play:
+flutter build appbundle -t lib/src/screens/main.dart
  -->
