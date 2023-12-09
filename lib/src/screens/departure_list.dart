@@ -70,7 +70,9 @@ class _DepartureListState extends State<DepartureList> {
         departures = value;
         isLoaded = true;
         if (departures.length > 0) {
-          getNextDepIndex();
+          setState(() {
+            getNextDepIndex();
+          });
         }
         context.loaderOverlay.hide();
       }
@@ -153,19 +155,15 @@ class _DepartureListState extends State<DepartureList> {
         TimeOfDay depTime =
             TimeOfDay(hour: int.parse(dep.ROD_IODH.split(":")[0]), minute: int.parse(dep.ROD_IODH.split(":")[1]));
         double depTimeD = timeToDouble(depTime);
-        if (depTimeD >= curTimeD) {
-          setState(() {
-            nextDepIndex = i;
-            exists = true;
-          });
+        if (depTimeD >= curTimeD) { 
+          nextDepIndex = i;
+          exists = true;
           break;
         }
       }
       if (!exists) nextDepIndex = departures.length;
     } else {
-      setState(() {
         nextDepIndex = 0;
-      });
     }
 
     // Scroll to the next departure
@@ -211,7 +209,7 @@ class _DepartureListState extends State<DepartureList> {
                   width: 10.0,
                 ),
                 Text(
-                  '${isSwitched ? widget.fromToStations[1].POS_NAZ : widget.fromToStations[0].POS_NAZ}',
+                  '${getFromStation().POS_NAZ}',
                   style: TextStyle(
                     fontSize: 16.0,
                     color: Colors.grey[800],
@@ -246,7 +244,7 @@ class _DepartureListState extends State<DepartureList> {
                     width: 10.0,
                   ),
                   Text(
-                    '${isSwitched ? widget.fromToStations[0].POS_NAZ : widget.fromToStations[1].POS_NAZ}',
+                    '${getToStation().POS_NAZ}',
                     style: TextStyle(
                       fontSize: 16.0,
                       color: Colors.grey[800],
@@ -311,7 +309,7 @@ class _DepartureListState extends State<DepartureList> {
                 fit: BoxFit.fitWidth,
                 child: Row(children: [
                   Text(
-                    '${isSwitched ? widget.fromToStations[1].POS_NAZ : widget.fromToStations[0].POS_NAZ} ',
+                    '${getFromStation().POS_NAZ} ',
                   ),
                   SizedBox(
                     height: 30,
@@ -327,7 +325,7 @@ class _DepartureListState extends State<DepartureList> {
                     ),
                   ),
                   Text(
-                    ' ${isSwitched ? widget.fromToStations[0].POS_NAZ : widget.fromToStations[1].POS_NAZ}',
+                    ' ${getToStation().POS_NAZ}',
                     overflow: TextOverflow.clip,
                   ),
                 ]),
