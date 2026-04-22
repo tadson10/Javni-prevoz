@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:vozniRed/src/type/departure.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:timelines/timelines.dart';
+import 'package:timelines_plus/timelines_plus.dart';
 import '../api/arriva_api.dart';
 import '../type/departureStation.dart';
 
